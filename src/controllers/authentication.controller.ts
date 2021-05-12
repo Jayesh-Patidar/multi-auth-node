@@ -6,7 +6,7 @@ import ResponseHelper from "../helpers/response.helper";
 import ResponseConstants from "../constants/response.constant";
 import AuthenticationHelper from "../helpers/authentication.helper";
 
-const controller = {
+const AuthenticationController = {
     async signup(req: Request, res: Response) {
         try {
             let { firstName, lastName, userName, password } = req.body;
@@ -18,17 +18,13 @@ const controller = {
                 password: bcrypt.hashSync(password, 10),
             });
 
+            user.password = "";
             return ResponseHelper.response(
                 res,
                 ResponseConstants.CREATED_RESPONSE,
-                "Signup successful",
+                "Signup successful!",
                 {
-                    user: {
-                        _id: user._id,
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        userName: user.userName,
-                    },
+                    user,
                     accessToken: AuthenticationHelper.generateAccessToken(user),
                     refershToken:
                         AuthenticationHelper.generateRefreshToken(user),
@@ -59,24 +55,20 @@ const controller = {
                     return ResponseHelper.response(
                         res,
                         ResponseConstants.UNAUTHORIZED_RESPONSE,
-                        "Invalid credentials",
+                        "Invalid credentials!",
                         {
                             user: null,
                         }
                     );
                 }
 
+                user.password = "";
                 return ResponseHelper.response(
                     res,
                     ResponseConstants.OK_RESPONSE,
-                    "Login successful",
+                    "Login successful!",
                     {
-                        user: {
-                            _id: user._id,
-                            firstName: user.firstName,
-                            lastName: user.lastName,
-                            userName: user.userName,
-                        },
+                        user,
                         accessToken:
                             AuthenticationHelper.generateAccessToken(user),
                         refershToken:
@@ -88,7 +80,7 @@ const controller = {
             return ResponseHelper.response(
                 res,
                 ResponseConstants.NOT_FOUND_RESPONSE,
-                "User not found",
+                "User not found!",
                 {
                     user: null,
                 }
@@ -104,6 +96,48 @@ const controller = {
             );
         }
     },
+
+    async refreshToken(req: Request, res: Response) {
+        try {
+            let userId = AuthenticationHelper.decodeRefreshToken(
+                req.body.refreshToken
+            );
+
+            let user: UserInterface | null = await UserModel.findOne({
+                _id: userId,
+            });
+
+            if (user) {
+                return ResponseHelper.response(
+                    res,
+                    ResponseConstants.OK_RESPONSE,
+                    "Access token refreshed successfully!",
+                    {
+                        accessToken:
+                            AuthenticationHelper.generateAccessToken(user),
+                    }
+                );
+            }
+
+            return ResponseHelper.response(
+                res,
+                ResponseConstants.NOT_FOUND_RESPONSE,
+                "User not found!",
+                {
+                    accessToken: null,
+                }
+            );
+        } catch (e) {
+            return ResponseHelper.response(
+                res,
+                ResponseConstants.SERVER_ERROR_RESPONSE,
+                ResponseConstants.SERVER_ERROR_MESSAGE,
+                {
+                    error: e.toString(),
+                }
+            );
+        }
+    },
 };
 
-export default controller;
+export default AuthenticationController;

@@ -15,6 +15,15 @@ const UserSchema: Schema = new Schema(
         password: {
             type: String,
         },
+        highestEducation: {
+            type: String,
+        },
+        institute: {
+            type: String,
+        },
+        passingYear: {
+            type: String,
+        },
     },
     {
         timestamps: true,
