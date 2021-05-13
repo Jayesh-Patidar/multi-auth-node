@@ -49,40 +49,7 @@
             getProfile();
 
             $("#update").click(() => {
-                $.ajax({
-                    url:
-                        "<%-BASE_URL%>" +
-                        `/api/user/update/${localStorage.getItem("userId")}`,
-                    method: "patch",
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "accessToken"
-                        )}`,
-                    },
-                    data: {
-                        firstName: $("#firstname").val(),
-                        lastName: $("#lastname").val(),
-                        password: $("#password").val(),
-                        newPassword: $("#newpassword").val(),
-                        highestEducation: $("#highesteducation").val(),
-                        institute: $("#institute").val(),
-                        passingYear: $("#passingyear").val(),
-                    },
-                    success: (data) => {
-                        alert(data.message);
-                        getProfile();
-                    },
-                    error: ({ status, responseJSON }) => {
-                        if (status === 400) {
-                            Object.keys(responseJSON.error).forEach((e) => {
-                                alert(responseJSON.error[e]);
-                            });
-                        }
-                        if (status !== 400) {
-                            alert(responseJSON.message);
-                        }
-                    },
-                });
+                updateProfile();
             });
 
             $("#logout").click(() => {
@@ -137,6 +104,69 @@
                                         data.accessToken
                                     );
                                     getProfile();
+                                },
+                                error: ({ status, responseJSON }) => {
+                                    alert(responseJSON.message);
+                                },
+                            });
+                        }
+                    },
+                });
+            }
+
+            function updateProfile() {
+                $.ajax({
+                    url:
+                        "<%-BASE_URL%>" +
+                        `/api/user/update/${localStorage.getItem("userId")}`,
+                    method: "patch",
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "accessToken"
+                        )}`,
+                    },
+                    data: {
+                        firstName: $("#firstname").val(),
+                        lastName: $("#lastname").val(),
+                        password: $("#password").val(),
+                        newPassword: $("#newpassword").val(),
+                        highestEducation: $("#highesteducation").val(),
+                        institute: $("#institute").val(),
+                        passingYear: $("#passingyear").val(),
+                    },
+                    success: (data) => {
+                        alert(data.message);
+                        getProfile();
+                    },
+                    error: ({ status, responseJSON }) => {
+                        if (status === 400) {
+                            Object.keys(responseJSON.error).forEach((e) => {
+                                alert(responseJSON.error[e]);
+                            });
+                        }
+                        if (status !== 401 || status !== 400) {
+                            alert(responseJSON.message);
+                        }
+
+                        if (
+                            responseJSON.error.includes(
+                                "TokenExpiredError: jwt expired"
+                            )
+                        ) {
+                            $.ajax({
+                                url:
+                                    "<%-BASE_URL%>" + `/api/auth/refresh-token`,
+                                method: "post",
+                                data: {
+                                    refreshToken:
+                                        localStorage.getItem("refreshToken"),
+                                },
+                                success: (data) => {
+                                    localStorage.setItem(
+                                        "accessToken",
+                                        data.accessToken
+                                    );
+                                    updateProfile();
                                 },
                                 error: ({ status, responseJSON }) => {
                                     alert(responseJSON.message);
