@@ -6,7 +6,7 @@
     "scripts": {
         "start": "node build/index.js",
         "dev": "nodemon src/index.ts",
-        "build": "tsc -p ."
+        "build": "tsc -p . && xcopy src\\views build\\views /i /y"
     },
     "author": "jayesh@shethink.in",
     "license": "ISC",

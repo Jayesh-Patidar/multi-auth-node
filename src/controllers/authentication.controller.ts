@@ -26,7 +26,7 @@ const AuthenticationController = {
                 {
                     user,
                     accessToken: AuthenticationHelper.generateAccessToken(user),
-                    refershToken:
+                    refreshToken:
                         AuthenticationHelper.generateRefreshToken(user),
                 }
             );
@@ -71,7 +71,7 @@ const AuthenticationController = {
                         user,
                         accessToken:
                             AuthenticationHelper.generateAccessToken(user),
-                        refershToken:
+                        refreshToken:
                             AuthenticationHelper.generateRefreshToken(user),
                     }
                 );

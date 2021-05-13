@@ -6,7 +6,7 @@ const rules: Rules = {
     firstName: "required|string",
     lastName: "required|string",
     userName: "required|string|unique:users,userName",
-    password: "required|string",
+    password: "required|string|min:6",
 };
 
 export default (req: Request, res: Response, next: NextFunction) =>

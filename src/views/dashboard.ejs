@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Multi Auth Node</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <style>
+            body {
+                text-align: center;
+            }
+            input {
+                margin: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Dashboard</h1>
+        <input type="text" id="username" placeholder="User Name" disabled />
+        <br />
+        <input type="text" id="firstname" placeholder="First Name" />
+        <br />
+        <input type="text" id="lastname" placeholder="Last Name" />
+        <br />
+        <input type="password" id="password" placeholder="Password" />
+        <br />
+        <input type="password" id="newpassword" placeholder="New Password" />
+        <br />
+        <input
+            type="text"
+            id="highesteducation"
+            placeholder="Highest Education"
+        />
+        <br />
+        <input type="text" id="institute" placeholder="Institute Name" />
+        <br />
+        <input type="text" id="passingyear" placeholder="Passing Year" />
+        <br />
+        <button id="update">Update</button>
+        <button id="logout">Logout</button>
+    </body>
+    <script>
+        $(document).ready(() => {
+            let accessToken = localStorage.getItem("accessToken");
+            if (!accessToken || accessToken === "") {
+                window.location.href = "<%-BASE_URL%>" + "/views/login";
+            }
+            getProfile();
+
+            $("#update").click(() => {
+                $.ajax({
+                    url:
+                        "<%-BASE_URL%>" +
+                        `/api/user/update/${localStorage.getItem("userId")}`,
+                    method: "patch",
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "accessToken"
+                        )}`,
+                    },
+                    data: {
+                        firstName: $("#firstname").val(),
+                        lastName: $("#lastname").val(),
+                        password: $("#password").val(),
+                        newPassword: $("#newpassword").val(),
+                        highestEducation: $("#highesteducation").val(),
+                        institute: $("#institute").val(),
+                        passingYear: $("#passingyear").val(),
+                    },
+                    success: (data) => {
+                        alert(data.message);
+                        getProfile();
+                    },
+                    error: ({ status, responseJSON }) => {
+                        if (status === 400) {
+                            Object.keys(responseJSON.error).forEach((e) => {
+                                alert(responseJSON.error[e]);
+                            });
+                        }
+                        if (status !== 400) {
+                            alert(responseJSON.message);
+                        }
+                    },
+                });
+            });
+
+            $("#logout").click(() => {
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                localStorage.removeItem("userId");
+                window.location.href = "<%-BASE_URL%>" + "/views/login";
+            });
+
+            function getProfile() {
+                $.ajax({
+                    url:
+                        "<%-BASE_URL%>" +
+                        `/api/user/profile/${localStorage.getItem("userId")}`,
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "accessToken"
+                        )}`,
+                    },
+                    method: "get",
+                    success: (data) => {
+                        alert(data.message);
+                        $("#username").val(data.user.userName);
+                        $("#firstname").val(data.user.firstName);
+                        $("#lastname").val(data.user.lastName);
+                        $("#password").val("");
+                        $("#newpassword").val("");
+                        $("#highesteducation").val(data.user.highestEducation);
+                        $("#institute").val(data.user.institute);
+                        $("#passingyear").val(data.user.passingYear);
+                    },
+                    error: ({ status, responseJSON }) => {
+                        if (!responseJSON.message.includes("Unauthorized!")) {
+                            alert(responseJSON.message);
+                        }
+                        if (
+                            responseJSON.error.includes(
+                                "TokenExpiredError: jwt expired"
+                            )
+                        ) {
+                            $.ajax({
+                                url:
+                                    "<%-BASE_URL%>" + `/api/auth/refresh-token`,
+                                method: "post",
+                                data: {
+                                    refreshToken:
+                                        localStorage.getItem("refreshToken"),
+                                },
+                                success: (data) => {
+                                    localStorage.setItem(
+                                        "accessToken",
+                                        data.accessToken
+                                    );
+                                    getProfile();
+                                },
+                                error: ({ status, responseJSON }) => {
+                                    alert(responseJSON.message);
+                                },
+                            });
+                        }
+                    },
+                });
+            }
+        });
+    </script>
+</html>

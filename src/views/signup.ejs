@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Multi Auth Node</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <style>
+            body {
+                text-align: center;
+            }
+            input {
+                margin: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Signup</h1>
+        <input type="text" id="firstname" placeholder="First Name" />
+        <br />
+        <input type="text" id="lastname" placeholder="Last Name" />
+        <br />
+        <input type="text" id="username" placeholder="User Name" />
+        <br />
+        <input type="password" id="password" placeholder="Password" />
+        <br />
+        <button>Signup</button>
+        <br />
+        <a href="<%-BASE_URL%>/views/login">Login</a>
+    </body>
+    <script>
+        $(document).ready(() => {
+            let accessToken = localStorage.getItem("accessToken");
+            if (accessToken) {
+                window.location.href = "<%-BASE_URL%>" + "/views/dashboard";
+            }
+            $("button").click(() => {
+                $.ajax({
+                    url: "<%-BASE_URL%>" + "/api/auth/signup",
+                    method: "post",
+                    data: {
+                        firstName: $("#firstname").val(),
+                        lastName: $("#lastname").val(),
+                        userName: $("#username").val(),
+                        password: $("#password").val(),
+                    },
+                    success: (data) => {
+                        alert(data.message);
+                        console.log(data);
+                        localStorage.setItem("accessToken", data.accessToken);
+                        localStorage.setItem("refreshToken", data.refreshToken);
+                        localStorage.setItem("userId", data.user._id);
+                        window.location.href =
+                            "<%-BASE_URL%>" + "/views/dashboard";
+                    },
+                    error: ({ status, responseJSON }) => {
+                        if (status === 400) {
+                            Object.keys(responseJSON.error).forEach((e) => {
+                                alert(responseJSON.error[e]);
+                            });
+                        }
+                        if (status !== 400) {
+                            alert(responseJSON.message);
+                        }
+                    },
+                });
+            });
+        });
+    </script>
+</html>

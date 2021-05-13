@@ -5,8 +5,8 @@ import ValidationMiddleware from "../middlewares/validation.middleware";
 const rules: Rules = {
     firstName: "required|string",
     lastName: "required|string",
-    password: "required|string",
-    newPassword: "string",
+    password: "required|string|min:6",
+    newPassword: "string|min:6",
     highestEducation: "string",
     institute: "string",
     passingYear: "string",

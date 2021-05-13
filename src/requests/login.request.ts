@@ -4,7 +4,7 @@ import ValidationMiddleware from "../middlewares/validation.middleware";
 
 const rules: Rules = {
     userName: "required|string",
-    password: "required|string",
+    password: "required|string|min:6",
 };
 
 export default (req: Request, res: Response, next: NextFunction) =>

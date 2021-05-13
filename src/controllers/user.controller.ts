@@ -49,19 +49,20 @@ const UserController = {
                 _id: req.params.id,
             });
 
-            if (user) {
-                console.log(user);
+            console.log(req.body);
 
+            if (user) {
                 if (bcrypt.compareSync(password, user.password)) {
                     user.firstName = firstName;
                     user.lastName = lastName;
                     user.password =
                         newPassword !== ""
-                            ? bcrypt.hashSync(password, 10)
+                            ? bcrypt.hashSync(newPassword, 10)
                             : user.password;
                     user.highestEducation = highestEducation;
                     user.institute = institute;
                     user.passingYear = passingYear;
+                    await user.save();
 
                     user.password = "";
 
