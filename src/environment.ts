@@ -37,8 +37,8 @@ const Environment: EnvironmentInterface = {
     },
 
     SECRET: {
-        JWT: "XYSGHJDGJSE",
-        REFRESH: "SDEKDJBDIEI",
+        JWT: "XYSGHJDGJSESHSJKFUIEKSNJKASDSOJD",
+        REFRESH: "SDEKDJBDIEIJDCJDJKSKSAJSASKASKLA'",
     },
 };
 
